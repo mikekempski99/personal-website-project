@@ -1,65 +1,184 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useCallback, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import ReadingNoteOverlay from './components/ReadingNoteOverlay';
+import FilmGrain from './components/FilmGrain';
+import ContactWidget from './components/widgets/ContactWidget';
+import ResumeWidget from './components/widgets/ResumeWidget';
+import ReadingNotesWidget from './components/widgets/ReadingNotesWidget';
+import ExperimentsWidget from './components/widgets/ExperimentsWidget';
+import LiveCommentsWidget from './components/widgets/LiveCommentsWidget';
+
+// Stagger animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 0.1, 0.25, 1],
+      staggerChildren: 0.12,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const widgetVariants = {
+  hidden: { 
+    opacity: 0, 
+    y: 20,
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.1, 0.25, 1],
+    },
+  },
+};
+
+interface ClickPosition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 export default function Home() {
+  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [clickPosition, setClickPosition] = useState<ClickPosition | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Track mouse for parallax effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 20,
+        y: (e.clientY / window.innerHeight - 0.5) * 20,
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const handleNoteClick = useCallback((noteId: string, element?: HTMLElement) => {
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      setClickPosition({
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+      });
+    }
+    setActiveNoteId(noteId);
+  }, []);
+
+  const handleCloseNote = useCallback(() => {
+    setActiveNoteId(null);
+    setClickPosition(null);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      {/* Film grain overlay */}
+      <FilmGrain />
+      
+      {/* Page fade-in from white */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        {/* Desktop Layout */}
+        <div className="hidden md:block h-screen overflow-hidden p-6 lg:p-8 relative">
+          {/* Parallax background */}
+          <motion.div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle at 30% 20%, rgba(0,0,0,0.02) 0%, transparent 50%)',
+            }}
+            animate={{
+              x: mousePosition.x * 0.5,
+              y: mousePosition.y * 0.5,
+            }}
+            transition={{ type: 'spring', stiffness: 50, damping: 30 }}
+          />
+          
+          <motion.div 
+            className="h-full max-w-6xl mx-auto relative"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="h-full grid grid-cols-[220px_1fr] gap-6">
+              {/* Left Column - Contact & Resume */}
+              <div className="flex flex-col gap-4 overflow-hidden">
+                <motion.div variants={widgetVariants} className="widget p-5 shrink-0">
+                  <ContactWidget />
+                </motion.div>
+                <motion.div variants={widgetVariants} className="widget p-5 flex-1 overflow-hidden">
+                  <ResumeWidget />
+                </motion.div>
+              </div>
+
+              {/* Right Column - Reading Notes, Experiments, Comments */}
+              <div className="flex flex-col gap-4 overflow-hidden">
+                <motion.div variants={widgetVariants} className="widget flex-[2] min-h-0 overflow-hidden">
+                  <ReadingNotesWidget onNoteClick={handleNoteClick} />
+                </motion.div>
+
+                <motion.div variants={widgetVariants} className="widget flex-[2] min-h-0 overflow-hidden">
+                  <ExperimentsWidget />
+                </motion.div>
+
+                <motion.div variants={widgetVariants} className="widget flex-1 min-h-[140px] overflow-hidden">
+                  <LiveCommentsWidget onCommentClick={(noteId) => handleNoteClick(noteId)} />
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </main>
-    </div>
+
+        {/* Mobile Layout */}
+        <motion.div 
+          className="md:hidden min-h-screen py-6 px-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <div className="space-y-4">
+            <motion.div variants={widgetVariants} className="widget p-5">
+              <ContactWidget />
+            </motion.div>
+
+            <motion.div variants={widgetVariants} className="widget p-5">
+              <ResumeWidget />
+            </motion.div>
+
+            <motion.div variants={widgetVariants} className="widget h-[400px]">
+              <ReadingNotesWidget onNoteClick={handleNoteClick} />
+            </motion.div>
+
+            <motion.div variants={widgetVariants} className="widget h-[400px]">
+              <ExperimentsWidget />
+            </motion.div>
+
+            <motion.div variants={widgetVariants} className="widget h-[280px]">
+              <LiveCommentsWidget onCommentClick={(noteId) => handleNoteClick(noteId)} />
+            </motion.div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Reading Note Overlay */}
+      <ReadingNoteOverlay 
+        noteId={activeNoteId} 
+        onClose={handleCloseNote}
+        clickPosition={clickPosition}
+      />
+    </>
   );
 }

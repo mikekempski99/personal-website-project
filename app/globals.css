@@ -1,26 +1,166 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafafa;
+  --foreground: #1a1a1a;
+  --muted: #666666;
+  --border: #e5e5e5;
+  --accent: #f5f5f5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Selection styling */
+::selection {
+  background: #1a1a1a;
+  color: #fafafa;
+}
+
+/* Focus styling */
+:focus-visible {
+  outline: 1px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+/* Smooth link hover with animated underline */
+.link-hover {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.link-hover::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+.link-hover:hover::after {
+  width: 100%;
+}
+
+.link-hover:hover {
+  opacity: 1;
+}
+
+/* Override default link styles */
+a, button {
+  transition: all 0.3s ease;
+}
+
+/* Widget base styles */
+.widget {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.widget:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+/* Full-screen overlay */
+.fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--background);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+/* Comment thread styles */
+.comment-thread {
+  border-left: 1px solid var(--border);
+  margin-left: 16px;
+  padding-left: 16px;
+}
+
+.comment-thread-1 { margin-left: 0; padding-left: 0; border-left: none; }
+.comment-thread-2 { margin-left: 24px; }
+.comment-thread-3 { margin-left: 48px; }
+.comment-thread-4 { margin-left: 72px; }
+.comment-thread-5 { margin-left: 96px; }
+
+/* Prose styles for reading notes */
+.prose {
+  max-width: none;
+}
+
+.prose p {
+  margin-bottom: 1em;
+}
+
+.prose h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose ul {
+  margin: 1em 0;
+}
+
+.prose li {
+  margin: 0.25em 0;
+}
+
+/* Subtle page load animation helper */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Custom margin utilities */
+.ml-18 {
+  margin-left: 4.5rem;
 }
