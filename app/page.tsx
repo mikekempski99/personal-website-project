@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import ReadingNoteOverlay from './components/ReadingNoteOverlay';
 import FilmGrain from './components/FilmGrain';
 import ContactWidget from './components/widgets/ContactWidget';
@@ -11,7 +11,7 @@ import ExperimentsWidget from './components/widgets/ExperimentsWidget';
 import LiveCommentsWidget from './components/widgets/LiveCommentsWidget';
 
 // Stagger animation variants
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -24,7 +24,7 @@ const containerVariants = {
   },
 };
 
-const widgetVariants = {
+const widgetVariants: Variants = {
   hidden: { 
     opacity: 0, 
     y: 20,
@@ -39,16 +39,8 @@ const widgetVariants = {
   },
 };
 
-interface ClickPosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
 export default function Home() {
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
-  const [clickPosition, setClickPosition] = useState<ClickPosition | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Track mouse for parallax effect
@@ -63,22 +55,12 @@ export default function Home() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const handleNoteClick = useCallback((noteId: string, element?: HTMLElement) => {
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      setClickPosition({
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height,
-      });
-    }
+  const handleNoteClick = useCallback((noteId: string) => {
     setActiveNoteId(noteId);
   }, []);
 
   const handleCloseNote = useCallback(() => {
     setActiveNoteId(null);
-    setClickPosition(null);
   }, []);
 
   return (
@@ -135,7 +117,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div variants={widgetVariants} className="widget flex-1 min-h-[140px] overflow-hidden">
-                  <LiveCommentsWidget onCommentClick={(noteId) => handleNoteClick(noteId)} />
+                  <LiveCommentsWidget onCommentClick={handleNoteClick} />
                 </motion.div>
               </div>
             </div>
@@ -167,7 +149,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div variants={widgetVariants} className="widget h-[280px]">
-              <LiveCommentsWidget onCommentClick={(noteId) => handleNoteClick(noteId)} />
+              <LiveCommentsWidget onCommentClick={handleNoteClick} />
             </motion.div>
           </div>
         </motion.div>
@@ -177,7 +159,6 @@ export default function Home() {
       <ReadingNoteOverlay 
         noteId={activeNoteId} 
         onClose={handleCloseNote}
-        clickPosition={clickPosition}
       />
     </>
   );

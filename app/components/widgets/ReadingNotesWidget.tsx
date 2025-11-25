@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { readingNotes, getCommentsForNote } from '@/app/lib/data';
 
 interface ReadingNotesWidgetProps {
-  onNoteClick: (noteId: string, element?: HTMLElement) => void;
+  onNoteClick: (noteId: string) => void;
 }
 
 export default function ReadingNotesWidget({ onNoteClick }: ReadingNotesWidgetProps) {
@@ -22,7 +22,7 @@ export default function ReadingNotesWidget({ onNoteClick }: ReadingNotesWidgetPr
             return (
               <motion.button
                 key={note.id}
-                onClick={(e) => onNoteClick(note.id, e.currentTarget as HTMLElement)}
+                onClick={() => onNoteClick(note.id)}
                 className="w-full text-left p-3 bg-[var(--accent)] rounded-lg transition-colors duration-300 group"
                 whileHover={{ 
                   scale: 1.02,

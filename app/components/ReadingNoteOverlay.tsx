@@ -1,23 +1,72 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { readingNotes, comments as allComments, Comment } from '@/app/lib/data';
-
-interface ClickPosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
 
 interface ReadingNoteOverlayProps {
   noteId: string | null;
   onClose: () => void;
-  clickPosition?: ClickPosition | null;
 }
 
-export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: ReadingNoteOverlayProps) {
+const overlayVariants: Variants = {
+  hidden: { 
+    opacity: 0,
+  },
+  visible: { 
+    opacity: 1,
+    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+  },
+  exit: { 
+    opacity: 0,
+    transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }
+  }
+};
+
+const cardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.98,
+    y: 20,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { 
+      duration: 0.4, 
+      ease: [0.25, 0.1, 0.25, 1],
+    }
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    y: 20,
+    transition: { 
+      duration: 0.3, 
+      ease: [0.25, 0.1, 0.25, 1],
+    }
+  }
+};
+
+const contentVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      delay: 0.15,
+      duration: 0.4, 
+      ease: [0.25, 0.1, 0.25, 1] 
+    }
+  },
+  exit: { 
+    opacity: 0,
+    transition: { duration: 0.15 }
+  }
+};
+
+export default function ReadingNoteOverlay({ noteId, onClose }: ReadingNoteOverlayProps) {
   const [newComment, setNewComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
@@ -85,80 +134,6 @@ export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: R
     return depthClasses[depth] || depthClasses[5];
   };
 
-  // Animation variants for the expanding card effect
-  const overlayVariants = {
-    hidden: { 
-      opacity: 0,
-    },
-    visible: { 
-      opacity: 1,
-      transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
-    },
-    exit: { 
-      opacity: 0,
-      transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }
-    }
-  };
-
-  const cardVariants = {
-    hidden: clickPosition ? {
-      position: 'fixed' as const,
-      top: clickPosition.y,
-      left: clickPosition.x,
-      width: clickPosition.width,
-      height: clickPosition.height,
-      borderRadius: 12,
-    } : {
-      opacity: 0,
-      scale: 0.95,
-    },
-    visible: {
-      position: 'fixed' as const,
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      borderRadius: 0,
-      transition: { 
-        duration: 0.4, 
-        ease: [0.25, 0.1, 0.25, 1],
-      }
-    },
-    exit: clickPosition ? {
-      position: 'fixed' as const,
-      top: clickPosition.y,
-      left: clickPosition.x,
-      width: clickPosition.width,
-      height: clickPosition.height,
-      borderRadius: 12,
-      transition: { 
-        duration: 0.35, 
-        ease: [0.25, 0.1, 0.25, 1],
-      }
-    } : {
-      opacity: 0,
-      scale: 0.95,
-      transition: { duration: 0.25 }
-    }
-  };
-
-  const contentVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        delay: 0.25,
-        duration: 0.4, 
-        ease: [0.25, 0.1, 0.25, 1] 
-      }
-    },
-    exit: { 
-      opacity: 0,
-      transition: { duration: 0.15 }
-    }
-  };
-
   return (
     <AnimatePresence mode="wait">
       {note && (
@@ -173,7 +148,7 @@ export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: R
             onClick={onClose}
           />
           
-          {/* Expanding card */}
+          {/* Card container */}
           <motion.div
             className="fixed inset-0 bg-[var(--background)] z-[1000] overflow-y-auto"
             variants={cardVariants}
@@ -215,7 +190,7 @@ export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: R
                   className="mb-8"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.4 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
                 >
                   <span className="text-xs uppercase tracking-wider text-[var(--muted)]">
                     {note.type}
@@ -236,7 +211,7 @@ export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: R
                   className="prose prose-lg mb-12"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.4 }}
+                  transition={{ delay: 0.3, duration: 0.4 }}
                 >
                   {note.notes.split('\n\n').map((paragraph, i) => {
                     if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
@@ -271,7 +246,7 @@ export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: R
                   className="border-t border-[var(--border)] my-8"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
-                  transition={{ delay: 0.5, duration: 0.4 }}
+                  transition={{ delay: 0.4, duration: 0.4 }}
                 />
 
                 {/* Comments Section */}
@@ -279,7 +254,7 @@ export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: R
                   className="mb-32"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5, duration: 0.4 }}
+                  transition={{ delay: 0.4, duration: 0.4 }}
                 >
                   <h2 className="text-xl font-semibold mb-6">Comments</h2>
                   
@@ -292,7 +267,7 @@ export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: R
                           key={comment.id}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.6 + index * 0.05, duration: 0.3 }}
+                          transition={{ delay: 0.5 + index * 0.05, duration: 0.3 }}
                           className={getDepthClass(comment.depth)}
                         >
                           <div className="py-3">
@@ -383,7 +358,7 @@ export default function ReadingNoteOverlay({ noteId, onClose, clickPosition }: R
                 className="fixed bottom-0 left-0 right-0 bg-[var(--background)]/95 backdrop-blur-sm border-t border-[var(--border)] p-4 z-10"
                 initial={{ y: 100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.3 }}
+                transition={{ delay: 0.5, duration: 0.3 }}
               >
                 <form 
                   onSubmit={(e) => handleSubmitComment(e)}
